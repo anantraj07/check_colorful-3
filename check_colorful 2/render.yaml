@@ -1,0 +1,14 @@
+# Render Blueprint: Render reads this file when you choose "New > Blueprint" and point it at the repo.
+services:
+  - type: web
+    name: court-analytics
+    runtime: python
+    plan: free                      # 512 MB RAM is enough: the app peaks at ~300 MB while importing
+    buildCommand: pip install -r requirements.txt
+    # One worker only: each worker would hold its own full copy of the case data in memory.
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1
+    healthCheckPath: /api/v1/health # answers 200 immediately, even while the CSVs are still importing
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
